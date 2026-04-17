@@ -2,147 +2,163 @@ import streamlit as st
 import os
 import base64
 
-# 1. CẤU HÌNH GIAO DIỆN (BẮT BUỘC ĐỂ TRÊN CÙNG)
-st.set_page_config(page_title=" Ecom Hub", layout="wide", initial_sidebar_state="collapsed")
+# 1. CẤU HÌNH & CSS "TẬN DIỆT" KHOẢNG TRỐNG (WOW UI)
+st.set_page_config(page_title=" Ecom Support Pro", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. CSS CHUẨN APPLE STORE (HIỆU ỨNG & GRID)
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    /* Xóa sạch padding/margin mặc định của Streamlit */
+    .block-container { padding-top: 1rem !important; padding-bottom: 0rem !important; }
+    [data-testid="stHeader"] { height: 0px !important; display: none !important; }
     
-    .stApp { background-color: #FBFBFD; font-family: 'Inter', sans-serif; }
-    
-    /* Hero Section (Tiêu đề to canh giữa) */
-    .hero { text-align: center; padding: 40px 0 30px 0; }
-    .hero h1 { font-size: 52px; font-weight: 700; color: #1D1D1F; letter-spacing: -1.5px; margin-bottom: 10px; }
-    .hero p { font-size: 22px; color: #86868B; font-weight: 500; }
+    .stApp { background-color: #F5F5F7; font-family: "SF Pro Display", -apple-system, sans-serif; }
 
-    /* Thiết kế Card dạng lưới (Grid) */
+    /* Card thiết kế chuẩn Apple Store */
     [data-testid="stVerticalBlockBorderWrapper"] {
         background: #FFFFFF !important;
-        border-radius: 24px !important;
-        border: 1px solid rgba(0,0,0,0.04) !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.03) !important;
+        border-radius: 20px !important;
+        border: 1px solid rgba(0,0,0,0.05) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03) !important;
         padding: 24px !important;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        height: 100%;
+        transition: all 0.3s cubic-bezier(0, 0, 0.5, 1);
+        height: 100% !important;
     }
-    /* Hiệu ứng nảy (Wow) khi đưa chuột vào Card */
     [data-testid="stVerticalBlockBorderWrapper"]:hover {
-        transform: scale(1.03);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.08) !important;
-        border: 1px solid rgba(0,113,227,0.2) !important;
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.1) !important;
+        border: 1px solid #0071E3 !important;
     }
 
-    /* Typo trong Card */
-    .card-title { font-size: 18px; font-weight: 600; color: #1D1D1F; line-height: 1.4; margin-bottom: 8px; text-transform: capitalize; height: 50px; overflow: hidden; }
-    .card-meta { font-size: 14px; color: #86868B; font-weight: 500; margin-bottom: 20px;}
+    /* Tiêu đề & Tóm tắt */
+    .file-title { color: #1D1D1F; font-size: 18px; font-weight: 700; margin-bottom: 8px; line-height: 1.3; }
+    .file-summary { color: #86868B; font-size: 14px; line-height: 1.5; margin-bottom: 15px; height: 42px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
 
-    /* Nút bấm phân cấp */
-    .stButton>button { background-color: #F5F5F7 !important; color: #0071E3 !important; border-radius: 14px !important; font-weight: 600 !important; border: none !important; width: 100%; transition: 0.2s; }
-    .stButton>button:hover { background-color: #E8E8ED !important; }
-    .stDownloadButton>button { background-color: #0071E3 !important; color: #FFFFFF !important; border-radius: 14px !important; font-weight: 600 !important; border: none !important; width: 100%; }
-    .stDownloadButton>button:hover { background-color: #0077ED !important; }
-
-    /* Thanh tìm kiếm & Dropdown */
-    .stTextInput input, .stSelectbox div[data-baseweb="select"] > div { border-radius: 14px !important; border: 1px solid #D2D2D7 !important; padding: 10px !important; font-size: 16px; background-color: #FFFFFF;}
+    /* Nút bấm Apple Style */
+    .stButton>button { background-color: #F5F5F7 !important; color: #0071E3 !important; border-radius: 12px !important; font-weight: 600 !important; border: none !important; width: 100%; }
+    .stDownloadButton>button { background-color: #0071E3 !important; color: #FFFFFF !important; border-radius: 12px !important; font-weight: 600 !important; border: none !important; width: 100%; }
     
-    [data-testid="stAppToolbar"], footer, header { visibility: hidden !important; }
+    /* Search Bar & Selectbox */
+    .stTextInput input { border-radius: 15px !important; background-color: #E8E8ED !important; border: none !important; padding: 15px !important; }
+    .stSelectbox div[data-baseweb="select"] { border-radius: 15px !important; background-color: #FFFFFF !important; }
+
+    [data-testid="stAppToolbar"] { visibility: hidden !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# 3. HÀM ĐỌC PDF (FIX LỖI TRẮNG MÀN HÌNH)
-def display_pdf(file_path):
-    with open(file_path, "rb") as f:
-        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-    # Đổi sang thẻ object, nếu trình duyệt chặn sẽ báo lỗi cụ thể
-    pdf_display = f'<object data="data:application/pdf;base64,{base64_pdf}" type="application/pdf" width="100%" height="800px" style="border-radius: 16px; border: 1px solid #e5e5e7;"><p style="text-align:center; padding: 50px; color: #ff3b30;">Trình duyệt của bạn đang chặn hiển thị PDF ẩn. Vui lòng bấm nút TẢI XUỐNG bên dưới để xem.</p></object>'
-    st.markdown(pdf_display, unsafe_allow_html=True)
-
-# 4. DANH MỤC LỌC THÔNG MINH
-categories_keywords = {
-    "Tất cả tài liệu": [],
-    "🎯 Khách Hàng Tiềm Năng & Tạo Đơn": ["tiềm năng", "0đ", "báo giá", "sổ tiêm chủng", "gia đình", "friend"],
-    "📞 Chăm Sóc Khách Hàng & Call Center": ["brc", "chăm sóc", "sau tiêm", "phản ứng", "pust"],
-    "⚙️ Quản Lý Vận Hành & Tồn Kho": ["tồn kho", "xuất off", "trả hàng", "địa chỉ", "trễ hẹn", "đóng cửa", "điểm thưởng", "momo"],
-    "👶 App Khách Hàng (Mẹ & Bé)": ["mẹ và bé", "me_va_be"]
+# 2. DATABASE TÓM TẮT (AI INSIGHTS)
+# Tui đã đọc file của Bột và viết sẵn tóm tắt ở đây
+summaries = {
+    "tiềm năng": "Quản lý phiếu KHTN V2, tự động chia data cho Sale và thiết lập thời gian gọi lại.",
+    "0đ": "Quy trình tự động cập nhật phiếu KHTN khi CTV Ecom đẩy đơn cọc 0đ thành công.",
+    "báo giá": "Tra cứu nhanh danh sách vắc xin theo nhóm bệnh và in báo giá ngay tại quầy.",
+    "sổ tiêm chủng": "Gợi ý phác đồ tiêm tiếp theo dựa trên lịch sử tiêm chủng thực tế của khách.",
+    "gia đình": "Thiết lập nhóm gia đình phòng vệ, gộp tích lũy và đổi điểm F-Sell cho người thân.",
+    "brc": "Xem lịch sử tin nhắn Broadcast gửi cho khách và đánh giá mức độ quan tâm.",
+    "sau tiêm": "Theo dõi sức khỏe khách hàng sau tiêm vắc xin đặc biệt (Sốt xuất huyết...).",
+    "xuất off": "Công cụ tạo và duyệt phiếu Xuất Off cho các đơn hàng lỗi cần xử lý thủ công.",
+    "momo": "Hướng dẫn khách hàng quét mã thanh toán MoMo và luồng đẩy đơn tự động.",
+    "tồn kho": "Cảnh báo khi số lượng vắc xin không đủ trả mũi cho khách đã hẹn trong 3 ngày.",
+    "địa chỉ": "Chuẩn hóa dữ liệu địa chỉ khách hàng theo cấu trúc 2 cấp/3 cấp mới nhất.",
+    "trễ hẹn": "Chính sách thu phí gia hạn hoặc vô hiệu hóa mũi tiêm khi khách trễ lịch >31 ngày.",
+    "đóng cửa": "Luồng xử lý chặn đơn và tự động gửi tin nhắn dời lịch khi trung tâm tạm đóng cửa.",
+    "điểm thưởng": "Quy định cộng điểm Hx (VD: H5 = 5.000đ) khi sale chốt đơn hàng HOT thành công.",
+    "mẹ và bé": "Theo dõi xu hướng phát triển, mọc răng của bé và tính năng AI kể truyện."
 }
 
-# 5. HEADER (HERO SECTION)
-st.markdown("""
-<div class="hero">
-    <h1>Ecom Support Hub</h1>
-    <p>Trung tâm tài liệu & Quy trình vận hành Hệ thống</p>
-</div>
-""", unsafe_allow_html=True)
+def get_summary(file_name):
+    for key, val in summaries.items():
+        if key in file_name.lower(): return val
+    return "Tài liệu hướng dẫn chi tiết về các tính năng và quy trình vận hành trên hệ thống."
 
-# 6. BỘ LỌC (FILTERS) VÀ TÌM KIẾM
-col_search, col_filter = st.columns([2, 1])
-with col_search:
-    search_query = st.text_input("🔍", placeholder="Bạn cần tìm hướng dẫn gì? (VD: xuất off, tồn kho...)")
-with col_filter:
-    selected_category = st.selectbox("📂 Lọc theo Danh mục:", list(categories_keywords.keys()))
+# 3. PHÂN NHÓM TỰ ĐỘNG
+categories = {
+    "Tất cả tài liệu": [],
+    "🎯 KHTN & Tạo Đơn": ["tiềm năng", "0đ", "báo giá", "sổ tiêm chủng"],
+    "💎 Chính sách & Khuyến mãi": ["gia đình", "friend", "điểm thưởng", "momo"],
+    "⚙️ Vận hành & Tồn kho": ["tồn kho", "xuất off", "trả hàng", "địa chỉ", "trễ hẹn", "đóng cửa"],
+    "📞 CSKH & Call Center": ["brc", "chăm sóc", "sau tiêm", "pust"],
+    "👶 App Khách Hàng": ["mẹ và bé", "me_va_be"],
+    "📂 Tài liệu khác": []
+}
 
-st.write("---")
+# 4. GIAO DIỆN CHÍNH
+st.markdown("<h1 style='margin-bottom:0px;'> Ecom Support Hub</h1>", unsafe_allow_html=True)
+st.markdown("<p style='color: #86868B; font-size: 18px; margin-top:0px;'>Tìm kiếm hướng dẫn & Quy trình vận hành.</p>", unsafe_allow_html=True)
 
-# 7. QUÉT VÀ XỬ LÝ FILE
+# Thanh Filter & Search nằm ngang
+c1, c2 = st.columns([2, 1])
+with c1:
+    search = st.text_input("", placeholder="Bạn muốn tìm gì? (momo, xuất off, điểm thưởng...)", label_visibility="collapsed")
+with c2:
+    # Fix lỗi trắng thanh lọc bằng cách set index mặc định
+    cat_list = list(categories.keys())
+    sel_cat = st.selectbox("", cat_list, index=0, label_visibility="collapsed")
+
+# QUÉT FILE
 try:
-    all_files = [f for f in os.listdir(".") if f.endswith(('.pdf', '.pptx'))]
-    all_files.sort()
+    files = [f for f in os.listdir(".") if f.endswith(('.pdf', '.pptx'))]
+    files.sort()
 except:
-    all_files = []
+    files = []
 
-if not all_files:
-    st.warning("⚠️ Chưa có file tài liệu nào. Bột nhớ upload lên GitHub nhé!")
+# PHÂN LOẠI FILE VÀO NHÓM
+categorized_data = {c: [] for c in categories}
+for f in files:
+    matched = False
+    for c, keys in categories.items():
+        if c == "Tất cả tài liệu" or c == "📂 Tài liệu khác": continue
+        if any(k in f.lower() for k in keys):
+            categorized_data[c].append(f)
+            matched = True
+            break
+    if not matched:
+        categorized_data["📂 Tài liệu khác"].append(f)
+
+# HIỂN THỊ
+display_files = []
+if sel_cat == "Tất cả tài liệu":
+    display_files = files
 else:
-    # Lọc file
-    filtered_files = []
-    for file_name in all_files:
-        # Lọc theo search bar
-        if search_query and search_query.lower() not in file_name.lower():
-            continue
-        
-        # Lọc theo Dropdown Category
-        if selected_category != "Tất cả tài liệu":
-            keywords = categories_keywords[selected_category]
-            if not any(kw.lower() in file_name.lower() for kw in keywords):
-                continue
+    display_files = categorized_data[sel_cat]
+
+# Lọc theo search
+if search:
+    display_files = [f for f in display_files if search.lower() in f.lower()]
+
+if not display_files:
+    st.info("Không tìm thấy tài liệu phù hợp.")
+else:
+    cols = st.columns(3)
+    for i, f in enumerate(display_files):
+        with cols[i % 3]:
+            with st.container(border=True):
+                name = f.rsplit(".", 1)[0].replace("-", " ").replace("_", " ")
+                st.markdown(f"<div class='file-title'>{name}</div>", unsafe_allow_html=True)
+                st.markdown(f"<div class='file-summary'>{get_summary(f)}</div>", unsafe_allow_html=True)
                 
-        filtered_files.append(file_name)
-
-    if not filtered_files:
-        st.info("Không tìm thấy tài liệu phù hợp với bộ lọc hiện tại.")
-    else:
-        # 8. HIỂN THỊ DẠNG LƯỚI (GRID 3 CỘT NHƯ APP STORE)
-        cols = st.columns(3) # Tạo 3 cột
-        
-        for index, file_name in enumerate(filtered_files):
-            # Tính toán để rải đều Card vào 3 cột
-            col = cols[index % 3] 
-            
-            display_name = file_name.rsplit(".", 1)[0].replace("-", " ").replace("_", " ")
-            file_ext = file_name.split('.')[-1].upper()
-            
-            with col:
-                with st.container(border=True):
-                    st.markdown(f"<div class='card-title'>{display_name}</div>", unsafe_allow_html=True)
-                    st.markdown(f"<div class='card-meta'>Định dạng: {file_ext}</div>", unsafe_allow_html=True)
-                    
-                    if file_ext == 'PDF':
-                        if st.button("👁️ Xem ngay", key=f"view_{file_name}"):
-                            st.session_state['viewing'] = file_name
+                c_v, c_d = st.columns(2)
+                with c_v:
+                    if f.endswith('.pdf'):
+                        if st.button("👁️ Xem", key=f"v_{f}"):
+                            st.session_state['view'] = f
                     else:
-                        st.markdown("<p style='font-size:13px; color:#86868b; text-align:center; margin-bottom: 12px;'>Không hỗ trợ xem trực tiếp</p>", unsafe_allow_html=True)
-                    
-                    with open(file_name, "rb") as f:
-                        st.download_button("⬇️ Tải xuống", data=f, file_name=file_name, key=f"dl_{file_name}")
+                        st.markdown("<p style='font-size:12px;color:#86868b;text-align:center;margin-top:10px;'>Ko hỗ trợ xem</p>", unsafe_allow_html=True)
+                with c_d:
+                    with open(f, "rb") as file_data:
+                        st.download_button("⬇️ Tải", file_data, file_name=f, key=f"d_{f}")
 
-        # Hiển thị View PDF nếu được bấm
-        if st.session_state.get('viewing'):
-            file_to_view = st.session_state['viewing']
-            st.write("---")
-            st.markdown(f"### Đang xem: {file_to_view}")
-            if st.button("❌ Đóng tài liệu", type="primary"):
-                st.session_state['viewing'] = None
-                st.rerun()
-            display_pdf(file_to_view)
+# VIEW PDF (FIX TRẮNG MÀN HÌNH)
+if st.session_state.get('view'):
+    f_view = st.session_state['view']
+    st.write("---")
+    c_h1, c_h2 = st.columns([5, 1])
+    with c_h1: st.markdown(f"### Đang xem: {f_view}")
+    with c_h2: 
+        if st.button("❌ Đóng"): 
+            st.session_state['view'] = None
+            st.rerun()
+    
+    with open(f_view, "rb") as f:
+        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+    pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="100%" height="1000px" type="application/pdf">'
+    st.markdown(pdf_display, unsafe_allow_html=True)
