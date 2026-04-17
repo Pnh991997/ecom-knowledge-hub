@@ -27,48 +27,31 @@ st.markdown("""
     h1 { color: #1D1D1F; font-size: 32px; font-weight: 700; margin-bottom: 0;}
     .file-title { color: #1D1D1F; font-size: 17px; font-weight: 700; margin-bottom: 6px; line-height: 1.3; }
     .file-summary { color: #86868B; font-size: 13.5px; line-height: 1.4; margin-bottom: 15px; height: 58px; overflow: hidden; }
+    
+    /* Chỉnh nhãn tiêu đề cho Search & Filter */
+    .custom-label { font-size: 15px; font-weight: 600; color: #1D1D1F; margin-bottom: 8px; display: block; }
 
-    /* Nút tải duy nhất */
+    /* Nút tải */
     .stDownloadButton>button { background-color: #1D1D1F !important; color: #FFFFFF !important; border-radius: 10px !important; font-weight: 600 !important; width: 100%; border: none !important; }
     .stDownloadButton>button:hover { background-color: #434344 !important; }
 
-    /* Search bar & Filter (Đã hiển thị rõ Label) */
+    /* Search bar & Filter */
     .stTextInput input, .stSelectbox div[data-baseweb="select"] > div { border-radius: 12px !important; border: 1px solid #D2D2D7 !important; padding: 12px !important; background-color: #FFFFFF;}
     [data-testid="stAppToolbar"], header { visibility: hidden !important; }
     
-    /* === NÚT AI SUPPORT NỔI (ĐEN NHÁM TỐI GIẢN APPLE) === */
+    /* === NÚT AI NỔI === */
     .floating-bot-btn {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        background-color: #1D1D1F; /* Màu đen Apple */
-        color: #FFFFFF !important;
-        border-radius: 30px;
-        padding: 12px 24px;
-        font-size: 15px;
-        font-weight: 500;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        text-decoration: none;
-        z-index: 99999;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        position: fixed; bottom: 30px; right: 30px; background-color: #1D1D1F; color: #FFFFFF !important;
+        border-radius: 30px; padding: 12px 24px; font-size: 15px; font-weight: 500;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2); text-decoration: none; z-index: 99999;
+        display: flex; align-items: center; gap: 8px; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     }
-    .floating-bot-btn:hover {
-        transform: scale(1.05);
-        background-color: #434344;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-    }
-    .bot-icon-svg {
-        width: 18px;
-        height: 18px;
-        fill: #FFFFFF;
-    }
+    .floating-bot-btn:hover { transform: scale(1.05); background-color: #434344; box-shadow: 0 12px 30px rgba(0,0,0,0.25); }
+    .bot-icon-svg { width: 18px; height: 18px; fill: #FFFFFF; }
     </style>
 """, unsafe_allow_html=True)
 
-# Nút nổi AI với Icon SVG Sparkle sạch sẽ
+# Nút nổi AI
 st.markdown("""
     <a href="https://gemini.google.com/gem/1chGk0Edaxf4kuzU1FTkFBZN7S21UJcNP?usp=sharing" target="_blank" class="floating-bot-btn">
         <svg class="bot-icon-svg" viewBox="0 0 24 24">
@@ -78,44 +61,49 @@ st.markdown("""
     </a>
 """, unsafe_allow_html=True)
 
-# 2. HÀM XỬ LÝ TÌM KIẾM TIẾNG VIỆT KHÔNG DẤU (ĐẢM BẢO TÌM LÀ THẤY)
+# 2. HÀM XÓA DẤU (ĐÃ FIX TRIỆT ĐỂ CHỮ 'Đ')
 def remove_accents(input_str):
     if not input_str: return ""
-    nfkd_form = unicodedata.normalize('NFKD', str(input_str))
+    s = str(input_str).replace("đ", "d").replace("Đ", "D")
+    nfkd_form = unicodedata.normalize('NFKD', s)
     return u"".join([c for c in nfkd_form if not unicodedata.combining(c)]).lower()
 
-# 3. DATABASE THÔNG MINH
+# 3. DATABASE THÔNG MINH (Bổ sung thêm từ khóa để Quét chuẩn 100%)
 file_metadata = [
-    {"keys": ["tiềm năng", "tiem nang"], "sum": "Quản lý phiếu KHTN V2, tự động chia data cho Sale và thiết lập gọi lại.", "tags": "khtn lead auto phan cong chia data goi lai telesale", "cat": "🎯 KHTN & Tạo Đơn"},
-    {"keys": ["0đ", "0d"], "sum": "Quy trình tự động cập nhật phiếu KHTN khi CTV Ecom đẩy đơn cọc 0đ.", "tags": "0 dong ctv ve tinh day don coc online", "cat": "🎯 KHTN & Tạo Đơn"},
+    {"keys": ["tiềm năng", "tiem nang", "khtn"], "sum": "Quản lý phiếu KHTN V2, tự động chia data cho Sale và thiết lập gọi lại.", "tags": "khtn lead auto phan cong chia data goi lai telesale", "cat": "🎯 KHTN & Tạo Đơn"},
+    {"keys": ["0đ", "0d", "vệ tinh"], "sum": "Quy trình tự động cập nhật phiếu KHTN khi CTV Ecom đẩy đơn cọc 0đ.", "tags": "0 dong ctv ve tinh day don coc online", "cat": "🎯 KHTN & Tạo Đơn"},
     {"keys": ["báo giá", "bao gia"], "sum": "Tra cứu nhanh danh sách vắc xin theo nhóm bệnh và in báo giá.", "tags": "nguy co in an list danh sach bang gia", "cat": "🎯 KHTN & Tạo Đơn"},
     {"keys": ["sổ tiêm chủng", "so tiem chung"], "sum": "Gợi ý phác đồ tiêm tiếp theo dựa trên lịch sử tiêm thực tế của khách.", "tags": "stc phac do goi y lich su mui tiep theo", "cat": "🎯 KHTN & Tạo Đơn"},
     {"keys": ["gia đình", "gia dinh", "phòng vệ"], "sum": "Thiết lập nhóm gia đình phòng vệ, gộp tích lũy và đổi điểm.", "tags": "gdls1 nhom fsell f-sell f sell tich diem nguoi than", "cat": "💎 Chính sách & Khuyến mãi"},
-    {"keys": ["friend", "diem_gia_dinh"], "sum": "Hướng dẫn sử dụng điểm F-Sell Gia đình để giảm giá đơn hàng.", "tags": "gdls1 nhom fsell f-sell f sell tich diem nguoi than", "cat": "💎 Chính sách & Khuyến mãi"},
-    {"keys": ["brc", "tin nhắn"], "sum": "Xem lịch sử tin nhắn Broadcast gửi cho khách và đánh giá quan tâm.", "tags": "tin nhan zalo zns sms chatbot bot broadcast tong dai call center auto", "cat": "📞 CSKH & Call Center"},
-    {"keys": ["chăm sóc", "cham soc", "đặc biệt"], "sum": "Theo dõi sức khỏe khách hàng sau tiêm vắc xin đặc biệt (SXH).", "tags": "csst goi dien hoi tham sxh dac biet", "cat": "📞 CSKH & Call Center"},
-    {"keys": ["phản ứng", "phan ung", "pust"], "sum": "Tiếp nhận, tạo phiếu theo dõi phản ứng sau tiêm (PUST).", "tags": "tac dung phu soc phan ve trieu chung", "cat": "📞 CSKH & Call Center"},
+    {"keys": ["friend", "friendsell"], "sum": "Hướng dẫn sử dụng điểm F-Sell Gia đình để giảm giá đơn hàng.", "tags": "gdls1 nhom fsell f-sell f sell tich diem nguoi than", "cat": "💎 Chính sách & Khuyến mãi"},
+    {"keys": ["brc", "tin nhắn", "tin nhan"], "sum": "Xem lịch sử tin nhắn Broadcast gửi cho khách và đánh giá quan tâm.", "tags": "tin nhan zalo zns sms chatbot bot broadcast tong dai call center auto", "cat": "📞 CSKH & Call Center"},
+    {"keys": ["chăm sóc", "cham soc", "đặc biệt", "sau tiêm"], "sum": "Theo dõi sức khỏe khách hàng sau tiêm vắc xin đặc biệt (SXH).", "tags": "csst goi dien hoi tham sxh dac biet sau tiem", "cat": "📞 CSKH & Call Center"},
+    {"keys": ["phản ứng", "phan ung", "pust", "tiếp nhận", "tiep nhan"], "sum": "Tiếp nhận, tạo phiếu theo dõi phản ứng sau tiêm (PUST).", "tags": "tac dung phu soc phan ve trieu chung", "cat": "📞 CSKH & Call Center"},
     {"keys": ["xuất off", "xuat off"], "sum": "Công cụ tạo và duyệt phiếu Xuất Off cho các đơn hàng lỗi.", "tags": "tool don loi duyet tu choi huy don admin", "cat": "⚙️ Vận hành & Tồn kho"},
     {"keys": ["trả hàng", "tra hang"], "sum": "Quy trình hoàn trả vắc xin và tính phí gia hạn, phí hoàn hủy.", "tags": "hoan tien phi gia han huy don", "cat": "⚙️ Vận hành & Tồn kho"},
     {"keys": ["momo"], "sum": "Hướng dẫn khách quét mã thanh toán MoMo và luồng đẩy đơn tự động.", "tags": "thanh toan qrcode qr code vi dien tu online", "cat": "💎 Chính sách & Khuyến mãi"},
     {"keys": ["tồn kho", "ton kho"], "sum": "Cảnh báo khi số lượng vắc xin không đủ trả mũi đã hẹn trong 3 ngày.", "tags": "het hang thieu hang tra mui 3 ngay canh bao", "cat": "⚙️ Vận hành & Tồn kho"},
-    {"keys": ["địa chỉ", "dia chi", "tcqg"], "sum": "Chuẩn hóa dữ liệu địa chỉ khách hàng theo cấu trúc chuẩn Nhà nước.", "tags": "3 cap 2 cap hanh chinh tcqg qg nang cap", "cat": "⚙️ Vận hành & Tồn kho"},
+    {"keys": ["địa chỉ", "dia chi", "tcqg", "nâng cấp"], "sum": "Chuẩn hóa dữ liệu địa chỉ khách hàng theo cấu trúc chuẩn Nhà nước.", "tags": "3 cap 2 cap hanh chinh tcqg qg nang cap", "cat": "⚙️ Vận hành & Tồn kho"},
     {"keys": ["trễ hẹn", "tre hen"], "sum": "Chính sách thu phí gia hạn hoặc vô hiệu hóa mũi tiêm khi trễ >31 ngày.", "tags": "phat thu phi gia han huy mui 31 ngay", "cat": "⚙️ Vận hành & Tồn kho"},
-    {"keys": ["đóng cửa", "dong cua"], "sum": "Luồng chặn đơn và gửi tin nhắn/voicebot dời lịch khi TTTC đóng cửa.", "tags": "sms d-5 d-2 voicebot bot auto goi tu dong doi lich", "cat": "⚙️ Vận hành & Tồn kho"},
+    {"keys": ["đóng cửa", "dong cua", "tttc"], "sum": "Luồng chặn đơn và gửi tin nhắn/voicebot dời lịch khi TTTC đóng cửa.", "tags": "sms d-5 d-2 voicebot bot auto goi tu dong doi lich", "cat": "⚙️ Vận hành & Tồn kho"},
     {"keys": ["điểm thưởng", "diem thuong", "hot"], "sum": "Quy định cộng điểm Hx khi sale chốt đơn hàng HOT thành công.", "tags": "hx kpi thuong doanh thu hot", "cat": "💎 Chính sách & Khuyến mãi"},
-    {"keys": ["mẹ và bé", "me_va_be"], "sum": "Theo dõi phát triển, mọc răng của bé và tính năng AI kể truyện.", "tags": "app khach hang moc rang chieu cao can nang ai bot ke truyen", "cat": "👶 App Khách Hàng"},
+    {"keys": ["mẹ và bé", "me_va_be", "me va be"], "sum": "Theo dõi phát triển, mọc răng của bé và tính năng AI kể truyện.", "tags": "app khach hang moc rang chieu cao can nang ai bot ke truyen", "cat": "👶 App Khách Hàng"},
     {"keys": ["b2b"], "sum": "Thiết lập, chỉnh sửa phiếu mua hàng dành riêng cho doanh nghiệp.", "tags": "pmh phieu mua hang doanh nghiep cong ty voucher b2b", "cat": "💎 Chính sách & Khuyến mãi"}
 ]
 
 def get_file_info(file_name):
-    fn_lower = file_name.lower()
+    # Thay thế các ký tự gạch nối để chuẩn hóa tên file trước khi kiểm tra
+    clean_name = file_name.replace("-", " ").replace("_", " ").lower()
+    fn_lower = remove_accents(clean_name)
+    
     for data in file_metadata:
         for key in data["keys"]:
-            if key in fn_lower:
+            # Quét trên cả chuỗi đã xóa dấu và chuỗi gốc
+            if remove_accents(key) in fn_lower or key.lower() in clean_name:
                 return data["sum"], data["tags"], data["cat"]
     return "Tài liệu hướng dẫn chi tiết quy trình vận hành trên hệ thống.", "tai lieu huong dan hdsd quy trinh", "📂 Tài liệu khác"
 
-# HEADER (Sửa đúng Text yêu cầu)
+# HEADER
 st.markdown("<h1> Ecom Operations Hub</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color: #86868B; font-size: 16px;'>Trung tâm tra cứu Hướng dẫn sử dụng & Quy trình vận hành Ecom.</p>", unsafe_allow_html=True)
 
@@ -124,13 +112,15 @@ tab1, tab2 = st.tabs(["📚 Kho Tài Liệu (HDSD)", "💡 FAQ Vận Hành"])
 
 with tab1:
     st.write("")
-    # BỘ LỌC ĐÃ QUAY TRỞ LẠI
+    # BỘ LỌC VÀ SEARCH (SỬ DỤNG MARKDOWN ĐỂ ÉP HIỂN THỊ LABEL TÊN)
     c_search, c_filter = st.columns([2, 1])
     with c_search:
-        search = st.text_input("🔍", placeholder="Nhập từ khóa liên quan (Ví dụ: bot, voicebot, f-sell, qrcode)...", label_visibility="collapsed")
+        st.markdown("<span class='custom-label'>🔍 Tìm kiếm tài liệu</span>", unsafe_allow_html=True)
+        search = st.text_input("Search", placeholder="Nhập từ khóa và nhấn Enter (Ví dụ: gia dinh, bot, pust)...", label_visibility="collapsed")
     with c_filter:
+        st.markdown("<span class='custom-label'>📂 Lọc theo danh mục</span>", unsafe_allow_html=True)
         cat_list = ["Tất cả danh mục", "🎯 KHTN & Tạo Đơn", "💎 Chính sách & Khuyến mãi", "⚙️ Vận hành & Tồn kho", "📞 CSKH & Call Center", "👶 App Khách Hàng", "📂 Tài liệu khác"]
-        sel_cat = st.selectbox("📂", cat_list, label_visibility="collapsed")
+        sel_cat = st.selectbox("Filter", cat_list, label_visibility="collapsed")
     
     try:
         files = [f for f in os.listdir(".") if f.endswith(('.pdf', '.pptx'))]
@@ -142,7 +132,7 @@ with tab1:
         st.warning("⚠️ Chưa có file tài liệu. Hãy upload lên GitHub!")
     else:
         display_files = []
-        search_kw = search.lower()
+        search_kw = remove_accents(search)
         
         for f in files:
             summary, tags, cat = get_file_info(f)
@@ -151,20 +141,25 @@ with tab1:
             if sel_cat != "Tất cả danh mục" and cat != sel_cat:
                 continue
                 
-            # Lọc theo search
+            # Lọc theo search (Quét tiếng Việt không dấu)
             if search_kw:
-                if search_kw not in f.lower() and search_kw not in summary.lower() and search_kw not in tags:
+                f_norm = remove_accents(f)
+                sum_norm = remove_accents(summary)
+                tag_norm = remove_accents(tags)
+                
+                if search_kw not in f_norm and search_kw not in sum_norm and search_kw not in tag_norm:
                     continue
             
             display_files.append(f)
 
         if not display_files:
-            st.info("Không tìm thấy tài liệu phù hợp.")
+            st.info("Không tìm thấy tài liệu phù hợp. Bột thử gõ từ khóa khác xem sao nhé!")
         else:
             cols = st.columns(3)
             for i, f in enumerate(display_files):
                 with cols[i % 3]:
                     with st.container(border=True):
+                        # Cắt bỏ phần đuôi mở rộng khi hiển thị tên
                         name = f.rsplit(".", 1)[0].replace("-", " ").replace("_", " ")
                         summary, _, _ = get_file_info(f)
                         
