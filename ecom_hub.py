@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import unicodedata
 
 # 1. CẤU HÌNH GIAO DIỆN
 st.set_page_config(page_title=" Ecom Operations Hub", layout="wide", initial_sidebar_state="collapsed")
@@ -20,7 +21,7 @@ st.markdown("""
         border: 1px solid rgba(0,0,0,0.05) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.03) !important;
         padding: 20px !important; height: 100% !important; transition: all 0.2s;
     }
-    [data-testid="stVerticalBlockBorderWrapper"]:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important; border: 1px solid #0071E3 !important; }
+    [data-testid="stVerticalBlockBorderWrapper"]:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.08) !important; border: 1px solid #1D1D1F !important; }
 
     /* Typo */
     h1 { color: #1D1D1F; font-size: 32px; font-weight: 700; margin-bottom: 0;}
@@ -28,62 +29,62 @@ st.markdown("""
     .file-summary { color: #86868B; font-size: 13.5px; line-height: 1.4; margin-bottom: 15px; height: 58px; overflow: hidden; }
 
     /* Nút tải duy nhất */
-    .stDownloadButton>button { background-color: #0071E3 !important; color: #FFFFFF !important; border-radius: 10px !important; font-weight: 600 !important; width: 100%; border: none !important; }
-    .stDownloadButton>button:hover { background-color: #0077ED !important; }
+    .stDownloadButton>button { background-color: #1D1D1F !important; color: #FFFFFF !important; border-radius: 10px !important; font-weight: 600 !important; width: 100%; border: none !important; }
+    .stDownloadButton>button:hover { background-color: #434344 !important; }
 
-    /* Search bar & Filter */
+    /* Search bar & Filter (Đã hiển thị rõ Label) */
     .stTextInput input, .stSelectbox div[data-baseweb="select"] > div { border-radius: 12px !important; border: 1px solid #D2D2D7 !important; padding: 12px !important; background-color: #FFFFFF;}
     [data-testid="stAppToolbar"], header { visibility: hidden !important; }
     
-    /* === NÚT AI SUPPORT NỔI (THIẾT KẾ MỚI CHUẨN IOS) === */
+    /* === NÚT AI SUPPORT NỔI (ĐEN NHÁM TỐI GIẢN APPLE) === */
     .floating-bot-btn {
         position: fixed;
         bottom: 30px;
         right: 30px;
-        background-color: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        color: #1D1D1F !important;
-        border-radius: 40px;
-        padding: 8px 24px 8px 8px;
+        background-color: #1D1D1F; /* Màu đen Apple */
+        color: #FFFFFF !important;
+        border-radius: 30px;
+        padding: 12px 24px;
         font-size: 15px;
-        font-weight: 600;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        font-weight: 500;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         text-decoration: none;
         z-index: 99999;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 8px;
         transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        border: 1px solid rgba(0,0,0,0.08);
     }
     .floating-bot-btn:hover {
         transform: scale(1.05);
-        box-shadow: 0 12px 35px rgba(0,0,0,0.18);
+        background-color: #434344;
+        box-shadow: 0 12px 30px rgba(0,0,0,0.25);
     }
-    .bot-icon {
-        background: linear-gradient(135deg, #0071E3 0%, #47A1FF 100%);
-        border-radius: 50%;
-        width: 38px;
-        height: 38px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        box-shadow: 0 4px 10px rgba(0, 113, 227, 0.3);
+    .bot-icon-svg {
+        width: 18px;
+        height: 18px;
+        fill: #FFFFFF;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Nút nổi AI
+# Nút nổi AI với Icon SVG Sparkle sạch sẽ
 st.markdown("""
     <a href="https://gemini.google.com/gem/1chGk0Edaxf4kuzU1FTkFBZN7S21UJcNP?usp=sharing" target="_blank" class="floating-bot-btn">
-        <div class="bot-icon">🤖</div>
-        <span>Bot_Ecom Vac</span>
+        <svg class="bot-icon-svg" viewBox="0 0 24 24">
+            <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+        </svg>
+        Bot_Ecom Vac
     </a>
 """, unsafe_allow_html=True)
 
-# 2. DATABASE THÔNG MINH (Chính xác 100%)
+# 2. HÀM XỬ LÝ TÌM KIẾM TIẾNG VIỆT KHÔNG DẤU (ĐẢM BẢO TÌM LÀ THẤY)
+def remove_accents(input_str):
+    if not input_str: return ""
+    nfkd_form = unicodedata.normalize('NFKD', str(input_str))
+    return u"".join([c for c in nfkd_form if not unicodedata.combining(c)]).lower()
+
+# 3. DATABASE THÔNG MINH
 file_metadata = [
     {"keys": ["tiềm năng", "tiem nang"], "sum": "Quản lý phiếu KHTN V2, tự động chia data cho Sale và thiết lập gọi lại.", "tags": "khtn lead auto phan cong chia data goi lai telesale", "cat": "🎯 KHTN & Tạo Đơn"},
     {"keys": ["0đ", "0d"], "sum": "Quy trình tự động cập nhật phiếu KHTN khi CTV Ecom đẩy đơn cọc 0đ.", "tags": "0 dong ctv ve tinh day don coc online", "cat": "🎯 KHTN & Tạo Đơn"},
